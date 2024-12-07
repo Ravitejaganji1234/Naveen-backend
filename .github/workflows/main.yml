@@ -3,7 +3,7 @@ name: Deploy Spring Boot Application to Azure App Service
 on:
   push:
     branches:
-      - main  # You can change this to your preferred branch
+      - main
 
 jobs:
   build-and-deploy:
@@ -14,22 +14,26 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Step 2: Set up Java JDK (Ensure to use the correct distribution and version)
+    # Step 2: Set up Java JDK 17 (Adoptium/Temurin)
     - name: Set up Java JDK 17
       uses: actions/setup-java@v3
       with:
-        java-version: '17'  # Use Java 17 (or adjust if you're using a different version)
-        distribution: 'temurin'  # Use 'temurin' instead of 'adoptopenjdk'
+        java-version: '17'
+        distribution: 'temurin'
 
-    # Step 3: Build the Spring Boot application (use Maven or Gradle)
+    # Step 3: Build with Maven
     - name: Build with Maven
       run: |
-        mvn clean install -DskipTests  # If using Maven
+        mvn clean install -DskipTests
 
-    # Step 4: Deploy to Azure Web App using the publish profile
+    # Step 4: Debugging - List files in target directory to confirm JAR name
+    - name: List files in target directory
+      run: ls -alh ./target/
+
+    # Step 5: Deploy to Azure Web App using the publish profile
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'mtlbackend'  # Replace with your Azure Web App name
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}  # Azure publish profile as secret
-        package: ./target/*.jar  # Path to the generated JAR file (or WAR file if applicable)
+        app-name: 'mtlbackend'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ./target/ems-backend-0.0.1-SNAPSHOT.jar  # Ensure this matches your JAR file
